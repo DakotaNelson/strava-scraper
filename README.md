@@ -9,3 +9,7 @@ To set up:
 To run:
 
 `source venv/bin/activate && cd tile_scraper && scrapy crawl tile_scraper`
+
+`source venv/bin/activate && cd user_scraper && scrapy crawl user_scraper -o outputfile.jl`
+
+(JL is for [JSON Lines format](http://jsonlines.org/))

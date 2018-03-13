@@ -3,7 +3,7 @@ import math
 
 import scrapy
 
-class ExampleSpider(scrapy.Spider):
+class TileSpider(scrapy.Spider):
     name = 'tile_scraper'
 
     allowed_domains = [
