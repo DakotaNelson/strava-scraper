@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+
 import scrapy
 
 
@@ -49,10 +51,27 @@ class SegmentSpider(scrapy.Spider):
         for row in leaderboard_rows:
             people.append(parse_row(row))
 
-        yield {
+        segment_object = {
             'id': location_id,
             'full_name': full_name,
             'location': location,
             'people': people,
-            'latlng': None # this is set in the pipeline
+            'latlng': None # this is set in the next parser
         }
+
+        geo_url = 'https://www.strava.com/stream/segments/{location_id}?streams%5B%5D=latlng'.format(location_id=location_id)
+        yield scrapy.Request(
+            url=geo_url,
+            callback=self.parse_latlng,
+            meta={'segment_object': segment_object}
+        )
+
+    def parse_latlng(self, response):
+        # provided by the previous parsing function
+        segment_object = response.meta['segment_object']
+
+        latlng = json.loads(response.body.decode('utf-8'))["latlng"]
+
+        segment_object["latlng"] = latlng
+
+        yield segment_object
