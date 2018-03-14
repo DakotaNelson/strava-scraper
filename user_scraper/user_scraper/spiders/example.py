@@ -11,7 +11,7 @@ class UserSpider(scrapy.Spider):
 
     def start_requests(self):
         """ yield a URL for each user """
-        max_user = 2000
+        max_user = 50
         for i in range(0,max_user+1):
             url = 'https://www.strava.com/athletes/{}'.format(i)
             yield scrapy.Request(
@@ -35,64 +35,69 @@ class UserSpider(scrapy.Spider):
         first_name = None
         last_name = None
         try:
-            first_name, last_name = full_name.split(' ')
+            tokens = full_name.split(' ')
+            first_name, last_name = tokens[0], tokens[-1]
         except ValueError:
             logging.error("Unable to parse name: {}".format(full_name))
         except AttributeError:
             logging.error("Unable to parse name: {}".format(full_name))
 
+        # the user's self-reported location
+        location = response.css('div.location::text').extract_first()
+
+        # recently uploaded images
+        uploaded_images = response.css('.photostream img::attr(src)').extract()
+
+        # the user's avatar
+        avatar = response.css('.athlete-hero .avatar-img::attr(src)').extract_first()
+
         # this regex can extract the user's ID from their strava profile photo
         # (unless they use a facebook/google profile photo)
         id_from_avatar_url = re.compile(r'cloudfront.net\/pictures\/athletes\/(\d+)')
+
+        def process_follows(following):
+            """ given a CSS selection of users that this user is following or
+            being followed by, return a list of dict objects representing
+            those users """
+            names = following.css('.avatar::attr(title)').extract()
+            avatars = following.css('.avatar-img::attr(src)').extract()
+            follows = []
+            for name,avatar_url in zip(names, avatars):
+                try:
+                    user_id = id_from_avatar_url.search(avatar_url).group().split('/')[-1]
+                except AttributeError:
+                    # didn't find it
+                    user_id = None
+                follows.append({
+                    'name': name,
+                    'avatar': avatar_url,
+                    'user_id': user_id
+                })
+            return follows
 
         # number of users they're following
         num_following = response.css('div.social.section :nth-child(1) span::text').extract_first()[2:]
         # names of "following"
         # PROTIP: there are only 6... but which 6 changes on every refresh!
         following = response.css('.social.section ul.grid-inline')[0]
-        names = following.css('.avatar::attr(title)').extract()
-        avatars = following.css('.avatar-img::attr(src)').extract()
-
-        follows = []
-        for name,avatar_url in zip(names, avatars):
-            try:
-                user_id = id_from_avatar_url.search(avatar_url).group().split('/')[-1]
-            except AttributeError:
-                # didn't find it
-                user_id = None
-            follows.append({
-                'name': name,
-                'avatar': avatar_url,
-                'user_id': user_id
-            })
+        follows = process_follows(following)
 
         # number of followers
         num_followers = response.css('div.social.section :nth-child(3) span::text').extract_first()[2:]
         # names of "followers"
+        # PROTIP: there are only 6... but which 6 changes on every refresh!
         followed = response.css('.social.section ul.grid-inline')[1]
-        names = followed.css('.avatar::attr(title)').extract()
-        avatars = followed.css('.avatar-img::attr(src)').extract()
-
-        followed_by = []
-        for name,avatar_url in zip(names, avatars):
-            try:
-                user_id = id_from_avatar_url.search(avatar_url).group().split('/')[-1]
-            except AttributeError:
-                # didn't find it
-                user_id = None
-            followed_by.append({
-                'name': name,
-                'avatar': avatar_url,
-                'user_id': user_id
-            })
-
+        followed_by = process_follows(followed)
 
         yield {
             'user_url': user_url,
             'full_name': full_name,
+            'avatar': avatar,
             'first_name': first_name,
             'last_name': last_name,
             'user_id': user_id,
+            'location': location,
+            'uploaded_images': uploaded_images,
             'num_following': num_following,
             'num_followers': num_followers,
             'following': follows,
