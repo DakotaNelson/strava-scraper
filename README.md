@@ -8,10 +8,9 @@ To set up:
 
 To run:
 
-`source venv/bin/activate && cd tile_scraper && scrapy crawl tile_scraper`
+`source venv/bin/activate && cd strava && scrapy crawl tiles`
 
-`source venv/bin/activate && cd user_scraper && scrapy crawl user_scraper -o outputfile.jl`
+Instead of `tiles`, you could run `users`, `activity`, etc. - if you look in the folder `strava/strava/spiders/` you'll find all the available things to crawl. If you want output, you can add `-o FILE` and `-t FORMAT` to save down the data to a file.
 
-You can use the previous two run examples to run any of the scrapers.
 
 (JL is for [JSON Lines format](http://jsonlines.org/))
