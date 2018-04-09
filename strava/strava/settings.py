@@ -14,11 +14,14 @@ BOT_NAME = 'strava'
 SPIDER_MODULES = ['strava.spiders']
 NEWSPIDER_MODULE = 'strava.spiders'
 
+MONGO_URI = 'localhost:27017'
+MONGO_DB = 'strava'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'strava (+http://www.yourdomain.com)'
 
-# Obey robots.txt rules
+# Obey robots.txt rules... or don't
+# break out your leather jackets, kids
 ROBOTSTXT_OBEY = False
 
 # To quiet the logs
@@ -67,9 +70,9 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'strava.pipelines.StravaPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'strava.pipelines.MongoPipeline': 900,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

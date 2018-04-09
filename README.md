@@ -6,6 +6,13 @@ To set up:
 
 `virtualenv --python=python3 venv && source venv/bin/activate && pip install requirements.txt`
 
+If you want to put the data in mongodb, make sure mongo is running (locally or otherwise):
+
+`sudo mongod --dbpath ./db/`
+
+Then, go to `strava-scraper/strava/strava/settings.py` and set `MONGO_URI` and `MONGO_DATABASE`.
+
+
 To run:
 
 `source venv/bin/activate && cd strava && scrapy crawl tiles`
