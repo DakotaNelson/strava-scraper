@@ -5,7 +5,7 @@ import scrapy
 
 
 class SegmentSpider(scrapy.Spider):
-    name = 'segment_scraper'
+    name = 'segments'
     allowed_domains = ['strava.com']
 
     start_urls = ['http://strava.com/']

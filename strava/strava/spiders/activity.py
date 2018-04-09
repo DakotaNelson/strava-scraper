@@ -5,7 +5,7 @@ import scrapy
 
 
 class ActivitySpider(scrapy.Spider):
-    name = 'activity_scraper'
+    name = 'activity'
     allowed_domains = ['strava.com']
 
     def start_requests(self):

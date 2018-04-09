@@ -4,7 +4,7 @@ import math
 import scrapy
 
 class TileSpider(scrapy.Spider):
-    name = 'tile_scraper'
+    name = 'tiles'
 
     allowed_domains = [
             'heatmap-external-a.strava.com',

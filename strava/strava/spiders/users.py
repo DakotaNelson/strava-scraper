@@ -6,7 +6,7 @@ import scrapy
 
 
 class UserSpider(scrapy.Spider):
-    name = 'user_scraper'
+    name = 'users'
     allowed_domains = ['strava.com']
 
     def start_requests(self):
