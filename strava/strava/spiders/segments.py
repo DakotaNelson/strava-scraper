@@ -8,12 +8,12 @@ class SegmentSpider(scrapy.Spider):
     name = 'segments'
     allowed_domains = ['strava.com']
 
-    start_urls = ['http://strava.com/']
-
     def start_requests(self):
         """ yield a URL for each segment """
-        max_segment = 100
-        for i in range(0,max_segment+1):
+        start = getattr(self, 'start', 0)
+        end = getattr(self, 'end', 1000)
+
+        for i in range(start,end+1):
             url = 'https://www.strava.com/segments/{}'.format(i)
             yield scrapy.Request(
                 url=url,
@@ -30,7 +30,7 @@ class SegmentSpider(scrapy.Spider):
         # e.g. "Stanmore Lane Down"
         full_name = response.css('[data-full-name]::text').extract_first()
 
-        # location of the... uh... lcation
+        # location of the... uh... location
         # e.g. "Winchester, Hampshire, United Kingdom"
         try:
             location = response.css('.location').extract_first().split('\n')[-2]

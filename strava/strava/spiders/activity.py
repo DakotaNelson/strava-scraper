@@ -10,8 +10,10 @@ class ActivitySpider(scrapy.Spider):
 
     def start_requests(self):
         """ yield a URL for each activity """
-        max_activity = 200
-        for i in range(0,max_activity+1):
+        start = getattr(self, 'start', 0)
+        end = getattr(self, 'end', 1000)
+
+        for i in range(start,end+1):
             url = 'https://www.strava.com/activities/{}'.format(i)
             yield scrapy.Request(
                 url=url,

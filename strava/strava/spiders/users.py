@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import logging
-
+import pymongo
 import scrapy
 
 
@@ -11,15 +11,42 @@ class UserSpider(scrapy.Spider):
 
     def start_requests(self):
         """ yield a URL for each user """
-        max_user = 50
-        for i in range(0,max_user+1):
-            url = 'https://www.strava.com/athletes/{}'.format(i)
-            yield scrapy.Request(
-                url=url,
-                meta = {'dont_redirect': True,
-                        'handle_httpstatus_list': [302]},
-                callback=self.parse
-            )
+        # get our options
+        start = getattr(self, 'start', 0)
+        end = getattr(self, 'end', 1000)
+        usemongo = bool(getattr(self, 'usemongo', False))
+
+        if usemongo:
+            mongo_uri = self.settings.get('MONGO_URI')
+            mongo_db = self.settings.get('MONGO_DB')
+
+            try:
+                logging.info("Starting user spider with Mongo query")
+                client = pymongo.MongoClient(mongo_uri)
+                db = client[mongo_db]
+                athletes = db.sitemap.find({"url_category": "athletes"})
+                logging.info("User spider found {} athletes".format(len(athletes)))
+                for athlete in athletes:
+                    yield scrapy.Request(
+                        url=athlete['url'],
+                        meta = {'dont_redirect': True,
+                                'handle_httpstatus_list': [302]},
+                        callback=self.parse
+                    )
+            finally:
+                self.client.close()
+
+        else:
+            logging.info("Starting user spider with range {} to {}".format(start, end+1))
+            for i in range(start,end+1):
+                url = 'https://www.strava.com/athletes/{}'.format(i)
+                yield scrapy.Request(
+                    url=url,
+                    meta = {'dont_redirect': True,
+                            'handle_httpstatus_list': [302]},
+                    callback=self.parse
+                )
+
 
     def parse(self, response):
         user_url = response.url

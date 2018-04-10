@@ -15,8 +15,10 @@ class TileSpider(scrapy.Spider):
     def start_requests(self):
         """ calculate out all the tiles we need to get, then yield each tile's
         URL for the spider to grab """
+        zoom_start = getattr(self, 'start', 0)
+        zoom_end = getattr(self, 'end', 19)
         max_zoom = 1
-        for zoom in range(0,max_zoom+1):
+        for zoom in range(zoom_start, zoom_end):
             tile_extent = 2 ** zoom
             for x in range(tile_extent):
                 for y in range(tile_extent):
