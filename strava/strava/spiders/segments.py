@@ -24,7 +24,7 @@ class SegmentSpider(scrapy.Spider):
 
     def parse(self, response):
         # ID of the location
-        location_id = response.url.split('/')[-1]
+        segment_id = response.url.split('/')[-1]
 
         # name of the location
         # e.g. "Stanmore Lane Down"
@@ -52,7 +52,7 @@ class SegmentSpider(scrapy.Spider):
             people.append(parse_row(row))
 
         segment_object = {
-            'id': location_id,
+            'segment_id': segment_id,
             'full_name': full_name,
             'location': location,
             'people': people,
