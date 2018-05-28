@@ -26,4 +26,8 @@ class SitemapSpider(scrapy.Spider):
         response.selector.register_namespace('xmlns', "http://www.sitemaps.org/schemas/sitemap/0.9")
         all_urls = response.selector.xpath('//xmlns:url/xmlns:loc/text()').extract()
         for url in all_urls:
-            yield {'url': url, 'url_category': url.split('/')[3]}
+            try:
+                url_category = url.split('/')[3]
+            except IndexError:
+                url_category = None
+            yield {'url': url, 'url_category': url_category}
