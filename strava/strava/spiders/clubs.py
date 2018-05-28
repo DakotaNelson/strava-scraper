@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import logging
 
+import pymongo
 
 class ClubsSpider(scrapy.Spider):
     name = 'clubs'
@@ -22,7 +24,7 @@ class ClubsSpider(scrapy.Spider):
                 client = pymongo.MongoClient(mongo_uri)
                 db = client[mongo_db]
                 clubs = db.sitemap.find({"url_category": "clubs"})
-                logging.info("Club spider found {} clubs".format(len(clubs)))
+                # logging.info("Club spider found {} clubs".format(len(clubs)))
                 for club in clubs:
                     yield scrapy.Request(
                         url=club['url'],

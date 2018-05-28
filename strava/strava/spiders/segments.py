@@ -10,8 +10,8 @@ class SegmentSpider(scrapy.Spider):
 
     def start_requests(self):
         """ yield a URL for each segment """
-        start = getattr(self, 'start', 0)
-        end = getattr(self, 'end', 1000)
+        start = int(getattr(self, 'start', 0))
+        end = int(getattr(self, 'end', 1000))
 
         for i in range(start,end+1):
             url = 'https://www.strava.com/segments/{}'.format(i)

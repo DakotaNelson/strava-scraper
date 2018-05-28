@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import json
 import logging
 import pymongo
 import scrapy
@@ -25,7 +26,6 @@ class RoutesSpider(scrapy.Spider):
                 client = pymongo.MongoClient(mongo_uri)
                 db = client[mongo_db]
                 routes = db.sitemap.find({"url_category": "routes"})
-                logging.info("Route spider found {} routes".format(len(routes)))
                 for route in routes:
                     yield scrapy.Request(
                         url=route['url'],
@@ -50,10 +50,20 @@ class RoutesSpider(scrapy.Spider):
     def parse(self, response):
         route_id = response.url.split('/')[-1]
 
-        route_name = response.css(".route-name h1::text").extract_first().strip()
+        try:
+            route_name = response.css(".route-name h1::text").extract_first().strip()
+        except:
+            route_name = None
 
-        user = json.loads(response.css('*').re("Strava\.Models\.Athlete\((.*)\)")[0])
-        route_data = json.loads(response.css('*').re("\.routeData\((.*)\)")[0])
+        try:
+            user = json.loads(response.css('*').re("Strava\.Models\.Athlete\((.*)\)")[0])
+        except IndexError:
+            user = None
+
+        try:
+            route_data = json.loads(response.css('*').re("\.routeData\((.*)\)")[0])
+        except IndexError:
+            route_data = None
 
         route = {
             "route_id": route_id,

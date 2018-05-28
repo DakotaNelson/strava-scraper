@@ -25,7 +25,6 @@ class UserSpider(scrapy.Spider):
                 client = pymongo.MongoClient(mongo_uri)
                 db = client[mongo_db]
                 athletes = db.sitemap.find({"url_category": "athletes"})
-                logging.info("User spider found {} athletes".format(len(athletes)))
                 for athlete in athletes:
                     yield scrapy.Request(
                         url=athlete['url'],

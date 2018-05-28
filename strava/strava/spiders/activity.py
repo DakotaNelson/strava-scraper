@@ -2,6 +2,7 @@
 import json
 
 import scrapy
+from scrapy.spidermiddlewares.httperror import HttpError
 
 
 class ActivitySpider(scrapy.Spider):
@@ -10,8 +11,8 @@ class ActivitySpider(scrapy.Spider):
 
     def start_requests(self):
         """ yield a URL for each activity """
-        start = getattr(self, 'start', 0)
-        end = getattr(self, 'end', 1000)
+        start = int(getattr(self, 'start', 0))
+        end = int(getattr(self, 'end', 1000))
 
         for i in range(start,end+1):
             url = 'https://www.strava.com/activities/{}'.format(i)
@@ -32,27 +33,33 @@ class ActivitySpider(scrapy.Spider):
 
         athlete_id = response.css('div.description > h2 > a::attr(href)').extract_first().split('/')[-1]
 
+        geo_url = 'https://www.strava.com/stream/{activity_id}?streams%5B%5D=latlng'.format(activity_id=activity_id)
         activity_object = {
             'full_name': name,
             'url': response.url,
             'activity_id': activity_id,
             'athlete_id': athlete_id,
+            'latlng_url': geo_url,
             'latlng': None # this is set in the next parser
         }
 
-        geo_url = 'https://www.strava.com/stream/{activity_id}?streams%5B%5D=latlng'.format(activity_id=activity_id)
         yield scrapy.Request(
             url=geo_url,
             callback=self.parse_latlng,
-            meta={'activity_object': activity_object}
+            meta={'activity_object': activity_object,
+                  'handle_httpstatus_list': [429]},
         )
 
     def parse_latlng(self, response):
         # provided by the previous parsing function
         activity_object = response.meta['activity_object']
 
-        latlng = json.loads(response.body.decode('utf-8'))["latlng"]
-
-        activity_object["latlng"] = latlng
+        if response.status == 429:
+            # we got blocked
+            pass
+        else:
+            # we're good, yay!
+            latlng = json.loads(response.body.decode('utf-8'))["latlng"]
+            activity_object["latlng"] = latlng
 
         yield activity_object
