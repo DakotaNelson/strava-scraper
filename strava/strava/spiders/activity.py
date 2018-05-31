@@ -6,7 +6,7 @@ from scrapy.spidermiddlewares.httperror import HttpError
 
 
 class ActivitySpider(scrapy.Spider):
-    name = 'activities'
+    name = 'activity'
     allowed_domains = ['strava.com']
 
     def start_requests(self):

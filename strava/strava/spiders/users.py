@@ -33,7 +33,7 @@ class UserSpider(scrapy.Spider):
                         callback=self.parse
                     )
             finally:
-                self.client.close()
+                client.close()
 
         else:
             logging.info("Starting user spider with range {} to {}".format(start, end+1))

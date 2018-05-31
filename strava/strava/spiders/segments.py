@@ -59,7 +59,7 @@ class SegmentSpider(scrapy.Spider):
             'latlng': None # this is set in the next parser
         }
 
-        geo_url = 'https://www.strava.com/stream/segments/{location_id}?streams%5B%5D=latlng'.format(location_id=location_id)
+        geo_url = 'https://www.strava.com/stream/segments/{location_id}?streams%5B%5D=latlng'.format(location_id=segment_id)
         yield scrapy.Request(
             url=geo_url,
             callback=self.parse_latlng,
