@@ -8,7 +8,7 @@ scrapy crawl -a usemongo=True -L INFO -s DOWNLOAD_DELAY=0 -s CONCURRENT_REQUESTS
 
 scrapy crawl -a usemongo=True -L INFO -s DOWNLOAD_DELAY=0 -s CONCURRENT_REQUESTS_PER_DOMAIN=40 -s JOBDIR=crawls/users users
 
-crapy crawl -a usemongo=True -L INFO -s DOWNLOAD_DELAY=0 -s CONCURRENT_REQUESTS_PER_DOMAIN=40 -s JOBDIR=crawls/routes routes
+scrapy crawl -a usemongo=True -L INFO -s DOWNLOAD_DELAY=0 -s CONCURRENT_REQUESTS_PER_DOMAIN=40 -s JOBDIR=crawls/routes routes
 
 scrapy crawl -L INFO -s CONCURRENT_REQUESTS_PER_DOMAIN=10 -s JOBDIR=crawls/tiles tiles
 

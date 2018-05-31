@@ -48,12 +48,21 @@ class ClubsSpider(scrapy.Spider):
 
     def parse(self, response):
         club_id = response.url.split('/')[-1]
-        club_name = response.css(".club-description h1::text").extract_first().strip()
-        club_location = response.css(".club-description p.location::text").extract_first().strip()
+        try:
+            club_name = response.css(".club-description h1::text").extract_first().strip()
+        except AttributeError:
+            club_name = None
+        try:
+            club_location = response.css(".club-description p.location::text").extract_first().strip()
+        except AttributeError:
+            club_location = None
         members = []
         for member in response.css("div.avatar a::attr(href)").extract():
             members.append(member.split('/')[-1])
-        num_members = response.css("div.club-members h3::text").re("(\d+)\ members")[0]
+        try:
+            num_members = response.css("div.club-members h3::text").re("(\d+)\ members")[0]
+        except IndexError:
+            num_members = None
         leaderboard = response.css(".leaderboard .athlete a::attr(href)").extract()
         for athlete in leaderboard:
             members.append(athlete.split('/')[-1])
