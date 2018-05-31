@@ -29,7 +29,7 @@ class UserSpider(scrapy.Spider):
                     yield scrapy.Request(
                         url=athlete['url'],
                         meta = {'dont_redirect': True,
-                                'handle_httpstatus_list': [302]},
+                                'handle_httpstatus_list': [302, 503]},
                         callback=self.parse
                     )
             finally:
@@ -42,7 +42,7 @@ class UserSpider(scrapy.Spider):
                 yield scrapy.Request(
                     url=url,
                     meta = {'dont_redirect': True,
-                            'handle_httpstatus_list': [302]},
+                            'handle_httpstatus_list': [302, 503]},
                     callback=self.parse
                 )
 
@@ -53,7 +53,7 @@ class UserSpider(scrapy.Spider):
 
         title_text = response.css('title::text').re('Strava .+ Profile')
         if len(title_text) < 1:
-            # invalid, we probably got a redirect
+            # invalid, we probably got a redirect/rate limit/etc.
             return
 
         full_name = response.css('h1.bottomless::text').extract_first()
