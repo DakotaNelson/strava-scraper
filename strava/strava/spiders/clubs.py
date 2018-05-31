@@ -33,7 +33,7 @@ class ClubsSpider(scrapy.Spider):
                         callback=self.parse
                     )
             finally:
-                self.client.close()
+                client.close()
 
         else:
             logging.info("Starting club spider with range {} to {}".format(start, end+1))
