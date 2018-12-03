@@ -13,8 +13,8 @@ class RoutesSpider(scrapy.Spider):
     def start_requests(self):
         """ yield a URL for each route """
         # get our options
-        start = getattr(self, 'start', 0)
-        end = getattr(self, 'end', 1000)
+        start = int(getattr(self, 'start', 0))
+        end = int(getattr(self, 'end', 1000))
         usemongo = bool(getattr(self, 'usemongo', False))
 
         if usemongo:

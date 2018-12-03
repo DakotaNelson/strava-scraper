@@ -56,6 +56,7 @@ class ActivitySpider(scrapy.Spider):
 
         if response.status == 429:
             # we got blocked
+            logging.warning("Activity spider got a rate-limit error 429")
             pass
         else:
             # we're good, yay!
