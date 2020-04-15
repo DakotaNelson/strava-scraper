@@ -49,7 +49,7 @@ class UserSpider(scrapy.Spider):
 
     def parse(self, response):
         user_url = response.url
-        user_id = response.url.split('/')[-1]
+        user_id = int(response.url.split('/')[-1])
 
         title_text = response.css('title::text').re('Strava .+ Profile')
         if len(title_text) < 1:
@@ -90,7 +90,7 @@ class UserSpider(scrapy.Spider):
             follows = []
             for name,avatar_url in zip(names, avatars):
                 try:
-                    user_id = id_from_avatar_url.search(avatar_url).group().split('/')[-1]
+                    user_id = int(id_from_avatar_url.search(avatar_url).group().split('/')[-1])
                 except AttributeError:
                     # didn't find it
                     user_id = None
@@ -116,7 +116,6 @@ class UserSpider(scrapy.Spider):
         followed_by = process_follows(followed)
 
         yield {
-            'user_url': user_url,
             'full_name': full_name,
             'avatar': avatar,
             'first_name': first_name,
@@ -124,8 +123,8 @@ class UserSpider(scrapy.Spider):
             'user_id': user_id,
             'location': location,
             'uploaded_images': uploaded_images,
-            'num_following': num_following,
-            'num_followers': num_followers,
+            'num_following': int(num_following),
+            'num_followers': int(num_followers),
             'following': follows,
             'followers': followed_by
         }

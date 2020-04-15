@@ -66,7 +66,7 @@ class RoutesSpider(scrapy.Spider):
             route_data = None
 
         route = {
-            "route_id": route_id,
+            "route_id": int(route_id),
             "name": route_name,
             "created_by": user,
             "metadata": route_data

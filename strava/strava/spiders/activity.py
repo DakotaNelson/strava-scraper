@@ -36,11 +36,11 @@ class ActivitySpider(scrapy.Spider):
         geo_url = 'https://www.strava.com/stream/{activity_id}?streams%5B%5D=latlng'.format(activity_id=activity_id)
         activity_object = {
             'full_name': name,
-            'url': response.url,
-            'activity_id': activity_id,
-            'athlete_id': athlete_id,
-            'latlng_url': geo_url,
-            'latlng': None # this is set in the next parser
+            #'url': response.url,
+            'activity_id': int(activity_id),
+            'athlete_id': int(athlete_id),
+            #'latlng_url': geo_url,
+            'path': None # this is set in the next parser
         }
 
         yield scrapy.Request(
@@ -61,6 +61,20 @@ class ActivitySpider(scrapy.Spider):
         else:
             # we're good, yay!
             latlng = json.loads(response.body.decode('utf-8'))["latlng"]
-            activity_object["latlng"] = latlng
+            if len(latlng) > 1:
+                activity_object["path"] = {
+                        "type": "LineString",
+                        "coordinates": [[y,x] for x,y in latlng]
+                    }
+            elif len(latlng) == 1:
+                activity_object["path"] = {
+                        "type": "LineString",
+                        # need len(coordinates) > 1 so we just add two
+                        # identical points /shrug
+                        "coordinates": [[y,x] for x,y in latlng + latlng]
+                    }
+            else: # length zero or some weird case
+                activity_object["path"] = None
+
 
         yield activity_object

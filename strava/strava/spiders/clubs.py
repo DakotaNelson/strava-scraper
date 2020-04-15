@@ -58,7 +58,12 @@ class ClubsSpider(scrapy.Spider):
             club_location = None
         members = []
         for member in response.css("div.avatar a::attr(href)").extract():
-            members.append(member.split('/')[-1])
+            member_num = member.split('/')[-1]
+            try:
+                member_num = int(member_num)
+            except:
+                pass
+            members.append(member_num)
         try:
             num_members = response.css("div.club-members h3::text").re("(\d+)\ members")[0]
         except IndexError:
@@ -69,9 +74,9 @@ class ClubsSpider(scrapy.Spider):
         members = list(set(members))
 
         yield {
-            "club_id": club_id,
+            "club_id": int(club_id),
             "club_name": club_name,
             "club_location": club_location,
             "club_members": members,
-            "club_num_members": num_members
+            "club_num_members": int(num_members)
         }
