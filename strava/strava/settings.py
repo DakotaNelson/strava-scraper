@@ -74,7 +74,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'strava.pipelines.MongoPipeline': 900,
+   'strava.pipelines.PostgresPipeline': 900,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

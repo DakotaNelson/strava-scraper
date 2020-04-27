@@ -64,14 +64,14 @@ class ActivitySpider(scrapy.Spider):
             if len(latlng) > 1:
                 activity_object["path"] = {
                         "type": "LineString",
-                        "coordinates": [[y,x] for x,y in latlng]
+                        "coordinates": [(y,x) for x,y in latlng]
                     }
             elif len(latlng) == 1:
                 activity_object["path"] = {
                         "type": "LineString",
                         # need len(coordinates) > 1 so we just add two
                         # identical points /shrug
-                        "coordinates": [[y,x] for x,y in latlng + latlng]
+                        "coordinates": [(y,x) for x,y in latlng + latlng]
                     }
             else: # length zero or some weird case
                 activity_object["path"] = None

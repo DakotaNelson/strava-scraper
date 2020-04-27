@@ -3,6 +3,8 @@ import re
 import logging
 import pymongo
 import scrapy
+import itertools
+from strava.items import User
 
 
 class UserSpider(scrapy.Spider):
@@ -13,42 +15,19 @@ class UserSpider(scrapy.Spider):
         """ yield a URL for each user """
         # get our options
         start = int(getattr(self, 'start', 0))
-        end = int(getattr(self, 'end', 1000))
-        usemongo = bool(getattr(self, 'usemongo', False))
 
-        if usemongo:
-            mongo_uri = self.settings.get('MONGO_URI')
-            mongo_db = self.settings.get('MONGO_DB')
-
-            try:
-                logging.info("Starting user spider with Mongo query")
-                client = pymongo.MongoClient(mongo_uri)
-                db = client[mongo_db]
-                athletes = db.sitemap.find({"url_category": "athletes"})
-                for athlete in athletes:
-                    yield scrapy.Request(
-                        url=athlete['url'],
-                        meta = {'dont_redirect': True,
-                                'handle_httpstatus_list': [302, 503]},
-                        callback=self.parse
-                    )
-            finally:
-                client.close()
-
-        else:
-            logging.info("Starting user spider with range {} to {}".format(start, end+1))
-            for i in range(start,end+1):
-                url = 'https://www.strava.com/athletes/{}'.format(i)
-                yield scrapy.Request(
-                    url=url,
-                    meta = {'dont_redirect': True,
-                            'handle_httpstatus_list': [302, 503]},
-                    callback=self.parse
-                )
+        logging.info(f"Starting user spider at id {start}")
+        for i in itertools.count(start=start):
+            url = 'https://www.strava.com/athletes/{}'.format(i)
+            yield scrapy.Request(
+                url=url,
+                meta = {'dont_redirect': True,
+                        'handle_httpstatus_list': [302, 503]},
+                callback=self.parse
+            )
 
 
     def parse(self, response):
-        user_url = response.url
         user_id = int(response.url.split('/')[-1])
 
         title_text = response.css('title::text').re('Strava .+ Profile')
@@ -105,26 +84,26 @@ class UserSpider(scrapy.Spider):
         num_following = response.css('div.social.section :nth-child(1) span::text').extract_first()[2:]
         # names of "following"
         # PROTIP: there are only 6... but which 6 changes on every refresh!
-        following = response.css('.social.section ul.grid-inline')[0]
-        follows = process_follows(following)
+        #following = response.css('.social.section ul.grid-inline')[0]
+        #follows = process_follows(following)
 
         # number of followers
         num_followers = response.css('div.social.section :nth-child(3) span::text').extract_first()[2:]
         # names of "followers"
         # PROTIP: there are only 6... but which 6 changes on every refresh!
-        followed = response.css('.social.section ul.grid-inline')[1]
-        followed_by = process_follows(followed)
+        #followed = response.css('.social.section ul.grid-inline')[1]
+        #followed_by = process_follows(followed)
 
-        yield {
-            'full_name': full_name,
-            'avatar': avatar,
-            'first_name': first_name,
-            'last_name': last_name,
-            'user_id': user_id,
-            'location': location,
-            'uploaded_images': uploaded_images,
-            'num_following': int(num_following),
-            'num_followers': int(num_followers),
-            'following': follows,
-            'followers': followed_by
-        }
+        yield User(
+                full_name = full_name,
+                avatar = avatar,
+                first_name = first_name,
+                last_name = last_name,
+                user_id = user_id,
+                location = location,
+                uploaded_images = uploaded_images,
+                num_following = num_following,
+                num_followers = num_followers,
+                following = [],
+                followers = []
+                )
