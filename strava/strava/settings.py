@@ -14,8 +14,8 @@ BOT_NAME = 'strava'
 SPIDER_MODULES = ['strava.spiders']
 NEWSPIDER_MODULE = 'strava.spiders'
 
-MONGO_URI = 'localhost:27017'
-MONGO_DB = 'strava'
+#MONGO_URI = 'localhost:27017'
+#MONGO_DB = 'strava'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
@@ -39,10 +39,11 @@ CONCURRENT_REQUESTS = 16
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 2.0
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 COOKIES_ENABLED = True
+RETRY_HTTP_CODES = [429]
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -62,7 +63,9 @@ COOKIES_ENABLED = True
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
+   #'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
+   'scrapy.middlewares.RetryMiddleware': None,
+   'strava.middlewares.TooManyRequestsRetryMiddleware': 500,
 }
 
 # Enable or disable extensions

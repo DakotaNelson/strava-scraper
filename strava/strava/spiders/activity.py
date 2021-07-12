@@ -55,8 +55,8 @@ class ActivitySpider(scrapy.Spider):
         activity_object = response.meta['activity_object']
 
         if response.status == 429:
-            # we got blocked
-            logging.warning("Activity spider got a rate-limit error 429")
+            # we got blocked (middleware SHOULD handle retries... in theory)
+            logging.warning(f"Activity spider rate-limit 429 for { activity_id}")
             pass
         else:
             # we're good, yay!

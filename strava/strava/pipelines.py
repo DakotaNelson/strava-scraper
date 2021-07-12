@@ -12,14 +12,14 @@ from geoalchemy2.shape import from_shape
 from strava.postgresql_utils import User, Activity
 
 class PostgresPipeline(object):
-    def __init__(self, postgres_uri):
+    def __init__(self):
         # TODO get from settings
-        self.postgres_uri = postgres_uri
+        self.postgres_uri = 'postgres:///strava'
         # TODO initialize tables and whatnot
 
     def open_spider(self, spider):
         # open a session with PostgreSQL
-        engine = sqlalchemy.create_engine(opts.postgres_uri)
+        engine = sqlalchemy.create_engine(self.postgres_uri)
         Session = sqlalchemy.orm.sessionmaker(bind=engine)
         self.psql = Session()
 

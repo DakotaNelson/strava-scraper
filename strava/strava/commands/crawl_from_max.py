@@ -13,7 +13,7 @@ class CrawlFromMax(ScrapyCommand):
         return "Start crawling from max(id) in database"
 
     def syntax(self):
-        return "[options] <table: {users,routes,clubs,activities}>"
+        return "[options] <table: {users,routes,clubs,activity}>"
 
     def add_options(self, parser):
         ScrapyCommand.add_options(self, parser)
@@ -26,7 +26,7 @@ class CrawlFromMax(ScrapyCommand):
 
     def run(self, args, opts):
         if len(args) != 1 or \
-                args[0] not in ["users", "routes", "clubs", "activities"]:
+                args[0] not in ["users", "routes", "clubs", "activity"]:
             raise UsageError()
 
         # open a session with PostgreSQL
@@ -35,18 +35,20 @@ class CrawlFromMax(ScrapyCommand):
         psql = Session()
 
         # TODO get max(id) for chosen table
+        # these will probably return bad numbers /shrug
         dbMax = 0
         if args[0] == "users":
             dbMax = psql.query(func.count(User.id))
-        elif args[0] == "activities":
+        elif args[0] == "activity":
             dbMax = psql.query(func.count(Activity.id))
         elif args[0] == "routes":
             raise NotImplementedError
         elif args[0] == "clubs":
             raise NotImplementedError
 
-        crawl_defer = self.crawler_process.crawl(args[0], start=dbMax,
-                **opts.spargs)
+        # TODO re-add **opts.spargs to allow passing spider args
+        crawl_defer = self.crawler_process.crawl(args[0], start=dbMax)
+                #**opts.spargs)
         if getattr(crawl_defer, 'result', None) is not None and \
                 issubclass(crawl_defer.result.type, Exception):
             self.exitcode = 1
