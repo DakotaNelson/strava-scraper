@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import itertools
 
 import scrapy
 from scrapy.spidermiddlewares.httperror import HttpError
@@ -12,9 +13,9 @@ class ActivitySpider(scrapy.Spider):
     def start_requests(self):
         """ yield a URL for each activity """
         start = int(getattr(self, 'start', 0))
-        end = int(getattr(self, 'end', 1000))
+        #end = int(getattr(self, 'end', 1000))
 
-        for i in range(start,end+1):
+        for i in itertools.count(start=start):
             url = 'https://www.strava.com/activities/{}'.format(i)
             yield scrapy.Request(
                 url=url,

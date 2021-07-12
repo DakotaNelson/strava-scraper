@@ -10,7 +10,7 @@ from strava.postgresql_utils import User, Activity
 
 class CrawlFromMax(ScrapyCommand):
     def short_desc(self):
-        return "Start crawling from max(id) in database"
+        return "Crawl strava.com"
 
     def syntax(self):
         return "[options] <table: {users,routes,clubs,activity}>"
@@ -20,9 +20,14 @@ class CrawlFromMax(ScrapyCommand):
         parser.add_option("--postgres_uri", dest="postgres_uri", metavar="URI",
                 help="connection string for PostgreSQL to put data into",
                 default="postgresql:///strava")
-        parser.add_option("-a", dest="spargs", action="append", default=[],
+        parser.add_option("-a", dest="spargs", action="append", default={},
                 metavar="NAME=VALUE",
                 help="set spider argument (may be repeated)")
+        parser.add_option("-m", "--max", action="store_true", dest="max",
+                help="start crawling from the largest ID found in the DB")
+        parser.add_option("-s", "--start", dest="start_val",
+                default=None, metavar="ID", type="int",
+                help="start crawling from the ID equal to this value")
 
     def run(self, args, opts):
         if len(args) != 1 or \
@@ -34,21 +39,23 @@ class CrawlFromMax(ScrapyCommand):
         Session = sqlalchemy.orm.sessionmaker(bind=engine)
         psql = Session()
 
-        # TODO get max(id) for chosen table
-        # these will probably return bad numbers /shrug
-        dbMax = 0
-        if args[0] == "users":
-            dbMax = psql.query(func.count(User.id))
-        elif args[0] == "activity":
-            dbMax = psql.query(func.count(Activity.id))
-        elif args[0] == "routes":
-            raise NotImplementedError
-        elif args[0] == "clubs":
-            raise NotImplementedError
+        start = 0
+        if opts.max:
+            if args[0] == "users":
+                start = psql.query(func.max(User.id)).scalar()
+            elif args[0] == "activity":
+                start = psql.query(func.max(Activity.id)).scalar()
+            elif args[0] == "routes":
+                raise NotImplementedError
+            elif args[0] == "clubs":
+                raise NotImplementedError
+        elif opts.start_val is not None:
+            start = opts.start_val
+        else:
+            raise UsageError()
 
-        # TODO re-add **opts.spargs to allow passing spider args
-        crawl_defer = self.crawler_process.crawl(args[0], start=dbMax)
-                #**opts.spargs)
+        crawl_defer = self.crawler_process.crawl(args[0], start=start,
+                **opts.spargs)
         if getattr(crawl_defer, 'result', None) is not None and \
                 issubclass(crawl_defer.result.type, Exception):
             self.exitcode = 1
